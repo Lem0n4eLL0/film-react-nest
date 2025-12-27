@@ -114,7 +114,7 @@ export interface OrderResult extends Ticket {
 export interface IFilmAPI {
     getFilms: () => Promise<Movie[]>;
     getFilmSchedule: (id: string) => Promise<Session[]>;
-    orderTickets: (order: Order) => Promise<OrderResult[]>;
+    orderTickets: (order: Order) => Promise<OrderResult[]>; // тут Order
 }
 
 /**

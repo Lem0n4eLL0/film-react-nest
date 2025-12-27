@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 import { FILMS_TAGS } from '../entity/films.entity';
 import ScheduleSessionSchema from './scheduleSession.schema';
 
@@ -53,6 +53,4 @@ export const FilmSchema = new Schema(
   },
 );
 
-const Film = model('film', FilmSchema);
-
-export default Film;
+export default FilmSchema;

@@ -1,12 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import FilmsRepository from 'src/repository/films.repository';
-import { IFilmOrder } from './dto/order.dto';
+import { FilmOrderDto } from './dto/order.dto';
 
 @Injectable()
 export default class OrderService {
   constructor(public readonly filmsRepository: FilmsRepository) {}
 
-  async orderTickets(order: IFilmOrder): Promise<IFilmOrder> {
+  async orderTickets(order: FilmOrderDto): Promise<FilmOrderDto> {
     const { tickets } = order;
     if (tickets.length === 0) return order;
 
@@ -18,34 +23,34 @@ export default class OrderService {
     );
 
     if (!isSameSession)
-      throw new BadRequestException(
+      throw new ConflictException(
         'All tickets must be for the same film and session',
       );
 
     const film = await this.filmsRepository.findById(filmId);
-    if (!film) throw new BadRequestException(`Film not found: ${filmId}`);
+    if (!film) throw new NotFoundException(`Film not found: ${filmId}`);
 
     const session = film.schedule.find((s) => s.id === sessionId);
     if (!session)
-      throw new BadRequestException(`Session not found: ${sessionId}`);
+      throw new NotFoundException(`Session not found: ${sessionId}`);
 
     const seatKeys = tickets.map((ticket) => {
       if (ticket.row < 1 || ticket.row > session.rows) {
-        throw new BadRequestException(`Invalid row: ${ticket.row}`);
+        throw new UnprocessableEntityException(`Invalid row: ${ticket.row}`);
       }
       if (ticket.seat < 1 || ticket.seat > session.seats) {
-        throw new BadRequestException(`Invalid seat: ${ticket.seat}`);
+        throw new UnprocessableEntityException(`Invalid row: ${ticket.row}`);
       }
       return `${ticket.row}:${ticket.seat}`;
     });
 
     if (new Set(seatKeys).size !== seatKeys.length) {
-      throw new BadRequestException('Duplicate seats in order');
+      throw new ConflictException('Duplicate seats in order');
     }
 
     for (const seatKey of seatKeys) {
       if (session.taken.includes(seatKey)) {
-        throw new BadRequestException(`Seat ${seatKey} is already taken`);
+        throw new ConflictException(`Seat ${seatKey} is already taken`);
       }
     }
 

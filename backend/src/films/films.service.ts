@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import FilmsRepository from '../repository/films.repository';
 import {
   toAllFilmsResponseDTO,
@@ -16,8 +16,7 @@ export default class FilmsService {
 
   public async getFilmSchedule(id: string) {
     const film = await this.filmsRepository.findById(id);
-    if (!film)
-      throw new BadRequestException(`There is no movie for id: "${id}"`);
+    if (!film) throw new NotFoundException(`There is no movie for id: "${id}"`);
     return toScheduleSessionResponseDTO(film);
   }
 }
