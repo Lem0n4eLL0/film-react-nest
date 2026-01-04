@@ -30,10 +30,11 @@ export default class OrderService {
     const film = await this.filmsRepository.findById(filmId);
     if (!film) throw new NotFoundException(`Film not found: ${filmId}`);
 
-    const session = film.schedule.find((s) => s.id === sessionId);
-    if (!session)
+    const sessionIndex = film.schedule.findIndex((s) => s.id === sessionId);
+    if (sessionIndex === -1)
       throw new NotFoundException(`Session not found: ${sessionId}`);
 
+    const session = film.schedule[sessionIndex];
     const seatKeys = tickets.map((ticket) => {
       if (ticket.row < 1 || ticket.row > session.rows) {
         throw new UnprocessableEntityException(`Invalid row: ${ticket.row}`);
@@ -55,6 +56,7 @@ export default class OrderService {
     }
 
     session.taken.push(...seatKeys);
+    film.schedule[sessionIndex] = session;
     await this.filmsRepository.updateFilm(film);
 
     return order;

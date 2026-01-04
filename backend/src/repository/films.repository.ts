@@ -1,27 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Driver } from 'src/app.config.provider';
+import { FilmMongo } from 'src/entities/mongodb/films.entity';
+import { FilmPostgres } from 'src/entities/postgres/films.entity';
 import { FilmDTO, toFilmDTO } from 'src/films/dto/films.dto';
-import { IFilm } from 'src/films/entity/films.entity';
+import { DataSource, MongoRepository, Repository } from 'typeorm';
 
 @Injectable()
 export default class FilmsRepository {
-  constructor(
-    @InjectModel('Film')
-    private readonly filmModel: Model<IFilm>,
-  ) {}
+  private readonly repo: Repository<any> | MongoRepository<any>;
+  private readonly driver: Driver;
 
-  async findAll(): Promise<FilmDTO[]> {
-    const docs = await this.filmModel.find().lean();
-    return docs.map(toFilmDTO);
+  constructor(private readonly dataSource: DataSource) {
+    this.driver = process.env.DATABASE_DRIVER as Driver;
+    this.repo =
+      this.driver === 'mongodb'
+        ? dataSource.getMongoRepository(FilmMongo)
+        : dataSource.getRepository(FilmPostgres);
   }
 
-  async findById(id: string): Promise<FilmDTO | null> {
-    const doc = await this.filmModel.findOne({ id }).lean();
-    return doc ? toFilmDTO(doc) : null;
+  async findAll() {
+    const films = await this.repo.find();
+    return films.map(toFilmDTO);
+  }
+
+  async findById(id: string) {
+    const film = await this.repo.findOne({ where: { id } });
+    return film ? toFilmDTO(film) : null;
   }
 
   async updateFilm(film: FilmDTO): Promise<void> {
-    await this.filmModel.findOneAndUpdate({ id: film.id }, film);
+    if (this.driver === 'mongodb') {
+      await (this.repo as MongoRepository<any>).findOneAndUpdate(
+        { id: film.id },
+        { $set: film },
+      );
+      return;
+    }
+    await this.repo.save(film);
   }
 }
