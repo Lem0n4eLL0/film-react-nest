@@ -1,4 +1,5 @@
 import { ConfigModule } from '@nestjs/config';
+import { LoggerType } from './common/loggers/loggerFactory';
 
 const configProvider = {
   imports: [ConfigModule.forRoot()],
@@ -12,6 +13,7 @@ const configProvider = {
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
     },
+    loggerType: process.env.LOGGER_TYPE || 'dev',
   },
 };
 
@@ -19,6 +21,7 @@ export type Driver = 'mongodb' | 'postgres';
 export interface AppConfig {
   database: AppConfigDatabase;
   port: number;
+  loggerType: LoggerType;
 }
 
 export interface AppConfigDatabase {
