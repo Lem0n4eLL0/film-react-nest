@@ -1,11 +1,15 @@
-import { Global, Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import FilmsRepository from './films.repository';
-import { MongooseModule } from '@nestjs/mongoose';
-import { FilmSchema } from 'src/films/schemas/film.schema';
+import { FilmPostgres } from 'src/entities/postgres/films.entity';
+import { SchedulePostgres } from 'src/entities/postgres/schedule.entity';
+import { FilmMongo } from 'src/entities/mongodb/films.entity';
 
 @Global()
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Film', schema: FilmSchema }])],
+  imports: [
+    TypeOrmModule.forFeature([FilmPostgres, SchedulePostgres, FilmMongo]),
+  ],
   providers: [FilmsRepository],
   exports: [FilmsRepository],
 })
