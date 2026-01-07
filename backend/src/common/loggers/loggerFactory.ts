@@ -1,6 +1,6 @@
 import { LoggerService } from '@nestjs/common';
 import { DevLogger } from './dev.logger';
-import { assertNever } from 'utils/utils';
+import { assertNever } from 'src/utils/utils';
 import { JsonLogger } from './json.logger';
 import { TskvLogger } from './tskv.logger';
 
