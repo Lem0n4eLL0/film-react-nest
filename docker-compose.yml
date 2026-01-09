@@ -3,7 +3,7 @@ services:
   backend:
     build: "./backend"
     env_file: "./backend/.env"
-    image: "nestjs-film-backend:prod"
+    image: "ghcr.io/lem0n4ell0/nestjs-film-backend:prod"
     networks:
       - internet-network
       - db-network
@@ -16,7 +16,7 @@ services:
     build: 
       context: .
       dockerfile: nginx/Dockerfile
-    image: "nestjs-film-nginx:prod"
+    image: "ghcr.io/lem0n4ell0/nestjs-film-nginx:prod"
     ports:
       - "80:80"
     networks:
