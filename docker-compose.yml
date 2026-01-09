@@ -1,9 +1,8 @@
 version: "3.9"
 services:
   backend:
-    build: "./backend"
-    env_file: "./backend/.env"
     image: "ghcr.io/lem0n4ell0/nestjs-film-backend:prod"
+    env_file: "./backend/.env"
     networks:
       - internet-network
       - db-network
@@ -13,9 +12,6 @@ services:
     restart: on-failure
 
   nginx:
-    build: 
-      context: .
-      dockerfile: nginx/Dockerfile
     image: "ghcr.io/lem0n4ell0/nestjs-film-nginx:prod"
     ports:
       - "80:80"
