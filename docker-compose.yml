@@ -1,0 +1,63 @@
+version: "3.9"
+services:
+  backend:
+    image: "ghcr.io/lem0n4ell0/nestjs-film-backend:prod"
+    env_file: "./backend/.env"
+    networks:
+      - internet-network
+      - db-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  nginx:
+    image: "ghcr.io/lem0n4ell0/nestjs-film-nginx:prod"
+    ports:
+      - "80:80"
+    networks:
+      - internet-network
+    depends_on:
+      - backend
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./db/init:/sqlfiles
+    networks:
+      - internet-network
+      - db-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: "postgres:16"
+    env_file: "./backend/.env.db"
+    networks:
+      - db-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+networks:
+  db-network:
+    driver: bridge
+    internal: true 
+  internet-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  frontend_dist:
